@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: entertainment-tadka-bot
+    runtime: php
+    buildCommand: |
+      apt-get update && apt-get install -y cron
+      docker-php-ext-install pdo_mysql
+      chmod -R 755 .
+      chmod 666 movies.csv users.json bot_stats.json
+      mkdir -p backups
+      chmod 777 backups
+    startCommand: apache2-foreground
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: WEBHOOK_URL
+        fromService:
+          name: entertainment-tadka-bot
+          type: web
+          property: url
+    cronJobs:
+      - name: daily_digest
+        schedule: "0 8 * * *"
+        command: "php /opt/render/project/src/bot.php daily_digest"
+      - name: auto_backup
+        schedule: "0 0 * * *"
+        command: "php /opt/render/project/src/bot.php auto_backup"
+    healthCheckPath: /
+    autoDeploy: true
