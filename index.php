@@ -561,7 +561,16 @@ if ($update) {
                     send_multilingual_response($chat_id, 'welcome', $lang);
                     $ch_list = "";
                     foreach ($channels_config['public_channels'] as $ch) $ch_list .= $ch['username'] . " - " . $ch['name'] . "\n";
-                    sendMessage($chat_id, "📢 Join our channels:\n$ch_list\n\n🤖 Commands:\n/request [movie] - Request a movie\n/myrequests - Your pending requests\n/checkdate - Date-wise stats\n/totaluploads - Movie list\n/help - Help\n\n🔍 Simply type any movie name to search!", null, 'HTML');
+                    
+                    $examples = "🎬 <b>Try searching these movies:</b>\n";
+                    $examples .= "• Mandala Murders 2025\n";
+                    $examples .= "• Zebra 2024\n";
+                    $examples .= "• Now You See Me All Parts\n";
+                    $examples .= "• Squid Game All Seasons\n";
+                    $examples .= "• Show Time (2024)\n";
+                    $examples .= "• Taskaree S01 (2025)\n\n";
+                    
+                    sendMessage($chat_id, "📢 Join our channels:\n$ch_list\n\n🤖 Commands:\n/request [movie] - Request a movie\n/myrequests - Your pending requests\n/checkdate - Date-wise stats\n/totaluploads - Movie list\n/help - Help\n\n$examples🔍 Simply type any movie name to search!", null, 'HTML');
                     break;
                 case '/help':
                     $help = "🤖 <b>Available Commands</b>\n\n";
