@@ -233,4 +233,39 @@ function handle_command($chat_id, $user_id, $command, $params = []) {
                 return;
             }
             send_typing_action($chat_id);
-            show_csv_data($chat_id
+            show_csv_data($chat_id);
+            break;
+            
+        case '/broadcast':
+            if (!$is_admin) {
+                sendMessage($chat_id, "❌ Admin only.");
+                return;
+            }
+            $msg = implode(' ', $params);
+            if (empty($msg)) {
+                sendMessage($chat_id, "❌ Usage: /broadcast <message>");
+                return;
+            }
+            send_typing_action($chat_id);
+            $users_data = json_decode(file_get_contents(USERS_FILE), true);
+            $count = 0;
+            foreach ($users_data['users'] as $uid => $u) {
+                sendMessage($uid, "📢 <b>Announcement</b>\n\n$msg", null, 'HTML');
+                $count++;
+                usleep(50000);
+            }
+            sendMessage($chat_id, "✅ Broadcast sent to $count users.");
+            break;
+            
+        case '/backup':
+            manual_backup($chat_id);
+            break;
+            
+        case '/backupstatus':
+            backup_status($chat_id);
+            break;
+            
+        default:
+            sendMessage($chat_id, "❌ Unknown command. Use /help");
+    }
+}
