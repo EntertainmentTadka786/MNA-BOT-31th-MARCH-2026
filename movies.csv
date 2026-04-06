@@ -1,4 +1,4 @@
-movie_name,message_id,date
-Mandala Murders 2025,6,15-04-2026
-Mandala Murders 2025,7,15-04-2026
-Mandala Murders 2025,8,15-04-2026
+movie_name, message_id, channel_id,date
+Mandala Murders 2025,6,-1003181705395,15-04-2026
+Mandala Murders 2025,7,-1003181705395,15-04-2026
+Mandala Murders 2025,8,-1003181705395,15-04-2026
