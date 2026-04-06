@@ -1,0 +1,7 @@
+.env
+*.csv
+*.log
+users.json
+bot_stats.json
+requests.json
+movie_requests.json
