@@ -1,5 +1,4 @@
-```json
 {
-    "pending_requests": [],
-    "completed_requests": []
+    "requests": [],
+    "last_id": 0
 }
