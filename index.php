@@ -11,7 +11,7 @@ define('GROUP_CHANNEL_ID', '@EntertainmentTadka7860');
 define('CSV_FILE', 'movies.csv');
 define('USERS_FILE', 'users.json');
 define('STATS_FILE', 'bot_stats.json');
-define('WAITING_FILE', 'waiting.json');      // NEW: persistent waiting list
+define('WAITING_FILE', 'waiting.json');
 define('BACKUP_DIR', 'backups/');
 define('CACHE_EXPIRY', 300);
 
@@ -32,8 +32,8 @@ if (!file_exists(STATS_FILE)) {
         'total_users' => 0,
         'total_searches' => 0,
         'last_updated' => date('Y-m-d H:i:s'),
-        'last_backup' => null,        // NEW: track last backup date
-        'last_digest' => null          // NEW: track last digest date
+        'last_backup' => null,
+        'last_digest' => null
     ]));
     chmod(STATS_FILE, 0666);
 }
@@ -51,12 +51,12 @@ if (!file_exists(BACKUP_DIR)) {
 $movie_messages = array();
 $movie_cache = array();
 
-// Load waiting list from file (NEW)
+// Load waiting list from file
 $waiting_users = json_decode(file_get_contents(WAITING_FILE), true);
 if (!is_array($waiting_users)) $waiting_users = array();
 
 // ==============================
-// Stats management functions (updated with last_run)
+// Stats management functions
 // ==============================
 function update_stats($field, $increment = 1) {
     if (!file_exists(STATS_FILE)) return;
@@ -145,7 +145,7 @@ function smart_search($query) {
 }
 
 // ==============================
-// Multi-language support (FIXED: mb_strpos)
+// Multi-language support
 // ==============================
 function detect_language($text) {
     $hindi_keywords = ['फिल्म', 'मूवी', 'डाउनलोड', 'हिंदी'];
@@ -185,7 +185,7 @@ function send_multilingual_response($chat_id, $message_type, $language) {
 }
 
 // ==============================
-// Auto-backup system (FIXED: recursive delete)
+// Auto-backup system with cleanup
 // ==============================
 function delete_directory($dir) {
     if (!file_exists($dir)) return true;
@@ -199,7 +199,6 @@ function delete_directory($dir) {
 }
 
 function auto_backup() {
-    // Only run once per day
     if (!should_run_today('backup')) return;
     
     $backup_files = [CSV_FILE, USERS_FILE, STATS_FILE, WAITING_FILE];
@@ -215,7 +214,7 @@ function auto_backup() {
         }
     }
     
-    // Keep only last 7 backups (delete older directories)
+    // Keep only last 7 backups
     $old_backups = glob(BACKUP_DIR . '*', GLOB_ONLYDIR);
     usort($old_backups, function($a, $b) {
         return filemtime($a) - filemtime($b);
@@ -230,7 +229,7 @@ function auto_backup() {
 }
 
 // ==============================
-// Daily digest feature (fixed trigger)
+// Daily digest feature
 // ==============================
 function send_daily_digest() {
     if (!should_run_today('digest')) return;
@@ -270,27 +269,6 @@ function send_daily_digest() {
     }
     
     set_last_run('digest');
-}
-
-// ==============================
-// User points system
-// ==============================
-function update_user_points($user_id, $action) {
-    $points_map = [
-        'search' => 1,
-        'found_movie' => 5,
-        'daily_login' => 10
-    ];
-    
-    $users_data = json_decode(file_get_contents(USERS_FILE), true);
-    if (!isset($users_data['users'][$user_id]['points'])) {
-        $users_data['users'][$user_id]['points'] = 0;
-    }
-    
-    $users_data['users'][$user_id]['points'] += $points_map[$action];
-    $users_data['users'][$user_id]['last_activity'] = date('Y-m-d H:i:s');
-    
-    file_put_contents(USERS_FILE, json_encode($users_data, JSON_PRETTY_PRINT));
 }
 
 // ==============================
@@ -394,7 +372,7 @@ function append_movie($movie_name, $message_id) {
     }
     $movie_messages[$movie][] = intval($message_id);
     
-    // NEW: Notify waiting users (persistent)
+    // Notify waiting users
     global $waiting_users;
     $changed = false;
     foreach ($waiting_users as $query => $users) {
@@ -417,7 +395,7 @@ function append_movie($movie_name, $message_id) {
 }
 
 // ==============================
-// Advanced search (fixed: pass user_id)
+// Advanced search (without points)
 // ==============================
 function advanced_search($chat_id, $user_id, $query) {
     global $movie_messages, $waiting_users;
@@ -431,7 +409,6 @@ function advanced_search($chat_id, $user_id, $query) {
     $found_movies = smart_search($query_lower);
     
     if (!empty($found_movies)) {
-        // NEW: Multilingual response for 'found'
         $lang = detect_language($query);
         send_multilingual_response($chat_id, 'found', $lang);
         
@@ -455,8 +432,6 @@ function advanced_search($chat_id, $user_id, $query) {
         
         sendMessage($chat_id, "🚀 Top matches:", $keyboard);
         
-        update_user_points($user_id, 'found_movie');
-        
     } else {
         $language = detect_language($query);
         send_multilingual_response($chat_id, 'not_found', $language);
@@ -470,7 +445,6 @@ function advanced_search($chat_id, $user_id, $query) {
     }
     
     update_stats('total_searches', 1);
-    update_user_points($user_id, 'search');
 }
 
 // ==============================
@@ -500,7 +474,7 @@ function admin_stats($chat_id) {
 }
 
 // ==============================
-// Telegram API functions (with error handling & return values)
+// Telegram API functions (with error handling)
 // ==============================
 function apiRequest($method, $params = array()) {
     $url = "https://api.telegram.org/bot" . BOT_TOKEN . "/" . $method;
@@ -509,7 +483,7 @@ function apiRequest($method, $params = array()) {
             'method' => 'POST',
             'content' => http_build_query($params),
             'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
-            'ignore_errors' => true  // allow us to read error responses
+            'ignore_errors' => true
         )
     );
     $context = stream_context_create($options);
@@ -546,11 +520,9 @@ function sendMessage($chat_id, $text, $reply_markup = null, $parse_mode = null) 
         $data['parse_mode'] = $parse_mode;
     }
     
-    $response = apiRequest('sendMessage', $data);
-    return ($response !== false);
+    return apiRequest('sendMessage', $data);
 }
 
-// FIXED: forwardMessage returns true/false
 function forwardMessage($chat_id, $from_chat_id, $message_id) {
     $response = apiRequest('forwardMessage', array(
         'chat_id' => $chat_id,
@@ -740,10 +712,7 @@ function test_csv($chat_id) {
 // ==============================
 $update = json_decode(file_get_contents('php://input'), true);
 if ($update) {
-    // CSV load
     get_cached_movies();
-    
-    // Run daily tasks only once per day (fixed)
     auto_backup();
     send_daily_digest();
     
@@ -765,7 +734,7 @@ if ($update) {
         $user_id = $message['from']['id'];
         $text = isset($message['text']) ? $message['text'] : '';
         
-        // User registration
+        // User registration (without points)
         $users_data = json_decode(file_get_contents(USERS_FILE), true);
         if (!isset($users_data['users'][$user_id])) {
             $users_data['users'][$user_id] = [
@@ -773,8 +742,7 @@ if ($update) {
                 'last_name' => $message['from']['last_name'] ?? '',
                 'username' => $message['from']['username'] ?? '',
                 'joined' => date('Y-m-d H:i:s'),
-                'last_active' => date('Y-m-d H:i:s'),
-                'points' => 0
+                'last_active' => date('Y-m-d H:i:s')
             ];
             $users_data['total_requests'] = ($users_data['total_requests'] ?? 0) + 1;
             file_put_contents(USERS_FILE, json_encode($users_data, JSON_PRETTY_PRINT));
@@ -809,7 +777,6 @@ if ($update) {
                 $welcome_msg .= "🔍 <b>Simply type any movie name to search!</b>";
                 
                 sendMessage($chat_id, $welcome_msg, null, 'HTML');
-                update_user_points($user_id, 'daily_login');
             }
             elseif ($command == '/stats' && $user_id == 1080317415) {
                 admin_stats($chat_id);
@@ -831,7 +798,7 @@ if ($update) {
         else if (!empty(trim($text))) {
             $language = detect_language($text);
             send_multilingual_response($chat_id, 'searching', $language);
-            advanced_search($chat_id, $user_id, $text);  // FIXED: pass user_id
+            advanced_search($chat_id, $user_id, $text);
         }
     }
     
@@ -956,12 +923,11 @@ if (!$update) {
     echo "<h3>🌟 Special Features</h3>";
     echo "<ul>";
     echo "<li>🤖 AI-Powered Search</li>";
-    echo "<li>🔔 Persistent Waiting List (saved in waiting.json)</li>";
+    echo "<li>🔔 Persistent Waiting List (waiting.json)</li>";
     echo "<li>📊 Advanced Analytics</li>";
-    echo "<li>🌐 Multi-Language Support (Hindi/English)</li>";
+    echo "<li>🌐 Multi-Language Support</li>";
     echo "<li>⚡ Smart Caching</li>";
     echo "<li>🛡️ Auto-Backup with cleanup</li>";
-    echo "<li>🎮 User Points System</li>";
     echo "<li>📅 Daily Digest (once per day)</li>";
     echo "<li>✅ API Error Handling & Logging</li>";
     echo "</ul>";
