@@ -1,4 +1,3 @@
-# Use official PHP 8.2 image with Apache
 FROM php:8.2-apache
 
 # Install system dependencies
@@ -10,11 +9,13 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    cron \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath
+    libzip-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache mod_rewrite
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 
 # Set working directory
 WORKDIR /var/www/html
@@ -25,17 +26,17 @@ COPY . /var/www/html/
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
-    && chmod 666 /var/www/html/movies.csv \
-    && chmod 666 /var/www/html/users.json \
-    && chmod 666 /var/www/html/bot_stats.json \
-    && mkdir -p /var/www/html/backups \
-    && chmod 777 /var/www/html/backups
+    && chmod -R 777 /var/www/html/backups \
+    && touch /var/www/html/bot_activity.log \
+    && chmod 666 /var/www/html/bot_activity.log
 
-# Configure cron for daily digest and backup
-RUN echo "0 8 * * * php /var/www/html/bot.php daily_digest" | crontab - \
-    && echo "0 0 * * * php /var/www/html/bot.php auto_backup" | crontab -
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Expose port 80
+# Install PHP dependencies (if any)
+RUN composer install --no-interaction --optimize-autoloader --no-dev || true
+
+# Expose port
 EXPOSE 80
 
 # Start Apache
