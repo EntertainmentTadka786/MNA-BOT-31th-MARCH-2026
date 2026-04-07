@@ -1,0 +1,35 @@
+{
+    "public_channels": {
+        "-1003181705395": {
+            "forward_header": true,
+            "name": "Main Channel"
+        },
+        "-1002831605258": {
+            "forward_header": true,
+            "name": "Theater Channel"
+        },
+        "-1003614546520": {
+            "forward_header": true,
+            "name": "Serial Channel"
+        },
+        "-1003083386043": {
+            "forward_header": true,
+            "name": "Request Group"
+        }
+    },
+    "private_channels": {
+        "-1003251791991": {
+            "forward_header": false,
+            "name": "Private Channel 1"
+        },
+        "-1002337293281": {
+            "forward_header": false,
+            "name": "Private Channel 2"
+        },
+        "-1002964109368": {
+            "forward_header": false,
+            "name": "Backup Channel"
+        }
+    },
+    "last_updated": "2026-04-07 10:00:00"
+}
