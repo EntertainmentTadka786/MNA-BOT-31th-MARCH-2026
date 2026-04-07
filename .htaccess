@@ -1,32 +1,39 @@
-# Enable rewrite engine
+# Enable Rewrite Engine
 RewriteEngine On
 
-# Set default charset
-AddDefaultCharset UTF-8
+# Security Headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "DENY"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Prevent directory listing
+Options -Indexes
 
 # Block access to sensitive files
-<FilesMatch "^(movies\.csv|users\.json|bot_stats\.json|requests\.json|movie_requests\.json|bot_activity\.log|\.env|composer\.json|composer\.lock)">
+<FilesMatch "\.(json|log|csv|txt|bak|zip)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Protect backup directory
-<IfModule mod_rewrite.c>
-    RewriteRule ^backups/ - [F,L]
-</IfModule>
+# Block access to .env files
+<FilesMatch "^\.env">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block access to backup directory
+RedirectMatch 403 ^/backups/.*$
+
+# Set default charset
+AddDefaultCharset UTF-8
 
 # PHP settings
-php_value display_errors 1
-php_value memory_limit 256M
-php_value max_execution_time 300
 php_value upload_max_filesize 50M
 php_value post_max_size 50M
+php_value max_execution_time 300
+php_value memory_limit 256M
 
-# Enable CORS if needed
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-</IfModule>
-
-# Custom error pages
-ErrorDocument 403 "Access forbidden"
-ErrorDocument 404 "Page not found"
+# Force HTTPS (uncomment if needed)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
