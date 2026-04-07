@@ -1,7 +1,42 @@
-.env
-*.csv
-*.log
+# Dependencies
+vendor/
+composer.phar
+composer.lock
+
+# Data files (jinhein Render pe env se manage karega)
+movies.csv
 users.json
 bot_stats.json
-requests.json
 movie_requests.json
+requests.json
+waiting.json
+indexing_log.json
+forward_settings.json
+cache_*.json
+
+# Logs
+bot_activity.log
+*.log
+
+# Backups
+backups/
+*.bak
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Composer
+composer.lock
