@@ -1,32 +1,19 @@
-# 🎬 Entertainment Tadka Telegram Bot
+# 🎬 Entertainment Tadka Bot v2.1.0
 
-A powerful Telegram bot for movie channel management with AI-powered search, analytics, and user engagement features.
+A powerful Telegram bot for movie search, requests, and channel management.
 
 ## ✨ Features
 
-- 🤖 AI-powered smart search (fuzzy matching)
-- 📊 Advanced analytics (daily, weekly, total stats)
-- 🌐 Multi-language support (Hindi/English)
-- 🔔 Smart notifications for pending requests
-- ⚡ Caching system for performance
-- 🛡️ Auto-backup system
-- 🎮 User points system
-- 📅 Daily digest
-- 🎛️ Inline keyboard navigation
+- 🔍 Smart movie search with Hindi/English support
+- 📁 Enhanced pagination browsing
+- 📝 Movie request system with daily limits
+- 👑 Complete admin panel (without commands!)
+- 🤖 Auto-indexing for new channel posts
+- 📊 Bulk approve/reject movie requests
+- 🔐 Toggle forward headers per channel
+- 💾 Auto-backup system to backup channel
+- 📈 Detailed statistics
 
-## 🚀 Commands
+## 🚀 Deployment on Render
 
-| Command | Description |
-|---------|-------------|
-| `/start` | Welcome message |
-| `/checkdate` | Date-wise upload stats |
-| `/totaluploads` | Paginated movie list |
-| `/testcsv` | Raw CSV viewer |
-| `/help` | Help message |
-| `/stats` | Admin statistics |
-
-## 📦 Installation
-
-### Using Docker
-```bash
-docker-compose up -d
+### Environment Variables (Add in Render Dashboard)
