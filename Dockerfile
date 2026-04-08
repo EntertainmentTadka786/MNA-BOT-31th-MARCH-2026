@@ -23,8 +23,9 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html/
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
+# Create backups directory FIRST, then set permissions
+RUN mkdir -p /var/www/html/backups \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 777 /var/www/html/backups \
     && touch /var/www/html/bot_activity.log \
